@@ -16,7 +16,10 @@ void PatriciaTrie::insert(const std::vector<uint8_t> &key, const std::string &va
     {
         root = std::make_shared<LeafNode>(value, key);
     }
-    insert_rec(root, key, value);
+    else
+    {
+        insert_rec(root, key, value);
+    }
 }
 
 void PatriciaTrie::attachLeafToBranch(std::shared_ptr<BranchNode> &branch, uint8_t dir, const std::string &value, const std::vector<uint8_t> &keyEnd)
@@ -565,4 +568,55 @@ std::vector<std::vector<uint8_t>> PatriciaTrie::_getAllKeys(const std::shared_pt
     }
 
     return {};
+}
+
+bool PatriciaTrie::contains(const std::vector<uint8_t> &currentKey)
+{
+    return _contains_rec(root, currentKey);
+}
+
+bool PatriciaTrie::_contains_rec(const std::shared_ptr<Node> &currentNode, const std::vector<uint8_t> &currentKey)
+{
+    if (!currentNode)
+    {
+        return false;
+    }
+
+    if (auto leaf = std::dynamic_pointer_cast<LeafNode>(currentNode))
+    {
+        return leaf->keyEnd == currentKey;
+    }
+    else if (auto extension = std::dynamic_pointer_cast<ExtensionNode>(currentNode))
+    {
+        const std::vector<uint8_t> &sharedNibble = extension->sharedNibble;
+
+        if (currentKey.size() < sharedNibble.size())
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < sharedNibble.size(); i++)
+        {
+            if (currentKey[i] != sharedNibble[i])
+            {
+                return false;
+            }
+        }
+
+        std::vector<uint8_t> newSuffix = chains::get_sufix(sharedNibble, currentKey);
+        return true && _contains_rec(extension->child, newSuffix);
+    }
+    else if (auto branch = std::dynamic_pointer_cast<BranchNode>(currentNode))
+    {
+        if (currentKey.empty())
+        {
+            return true;
+        }
+
+        uint8_t dir = currentKey[0];
+        std::vector<uint8_t> newSuffix = chains::strip_first_nibble(currentKey);
+        return true && _contains_rec(branch->children[dir], newSuffix);
+    }
+
+    return false;
 }

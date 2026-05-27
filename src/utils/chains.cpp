@@ -76,6 +76,11 @@ namespace chains
 
     std::vector<uint8_t> get_sufix(const std::vector<uint8_t> &prefix, const std::vector<uint8_t> &chain)
     {
+        if (prefix == chain)
+        {
+            return {};
+        }
+
         if (prefix.size() == 0 || prefix.size() >= chain.size())
         {
             return {};

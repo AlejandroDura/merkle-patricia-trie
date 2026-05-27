@@ -16,6 +16,7 @@ public:
 
     void insert(const std::vector<uint8_t> &key, const std::string &value);
     void printKeys();
+    bool contains(const std::vector<uint8_t> &currentKey);
 
 private:
     void insert_rec(std::shared_ptr<Node> &currentNode, const std::vector<uint8_t> &currentKey, const std::string &value);
@@ -30,6 +31,8 @@ private:
     void attachLeafToBranch(std::shared_ptr<BranchNode> &branch, uint8_t dir, const std::string &value, const std::vector<uint8_t> &keyEnd);
 
     std::vector<std::vector<uint8_t>> _getAllKeys(const std::shared_ptr<Node> &currentNode);
+
+    bool _contains_rec(const std::shared_ptr<Node> &currentNode, const std::vector<uint8_t> &currentKey);
 };
 
 #endif
